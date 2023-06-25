@@ -9,7 +9,8 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/app.js",
-    "watch-ts": "tsc -w"
+    "watch-ts": "tsc -w",
+    "prepare": "npm run build"
   },
   "dependencies": {
     "sqlite": "^4.2.1",
