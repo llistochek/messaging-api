@@ -12,19 +12,24 @@ export default class Store {
     `
       CREATE TABLE IF NOT EXISTS chats (
         id TEXT PRIMARY KEY,
-        name TEXT
+        name TEXT,
+        is_group BOOLEAN,
+        source TEXT
       )
     `,
     `
       CREATE TABLE IF NOT EXISTS messages (
         id TEXT PRIMARY KEY,
         text TEXT,
-        fromMe BOOLEAN,
-        isReply BOOLEAN,
+        from_me BOOLEAN,
+        is_reply BOOLEAN,
         chat_id TEXT,
         sender TEXT,
         timestamp INTEGER,
-        senderName TEXT
+        sender_name TEXT,
+        phone_number TEXT,
+        is_group BOOLEAN,
+        source TEXT
       )
     `
   ];
@@ -49,18 +54,21 @@ export default class Store {
   async insertMessage(message: MessageModel) {
     await this.db.run(
       `
-        INSERT OR IGNORE INTO messages (id, text, fromMe, isReply, chat_id, sender, timestamp, senderName)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT OR IGNORE INTO messages (id, text, from_me, is_reply, chat_id, sender, timestamp, sender_name, phone_number, is_group, source)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `,
       [
         message.id,
         message.text,
         message.fromMe,
         message.isReply,
-        message.chat,
-        message.sender,
+        message.chatId,
+        message.senderId,
         message.timestamp,
-        message.senderName
+        message.senderName,
+        message.phoneNumber,
+        message.isGroup,
+        message.source
       ]
     );
   }
@@ -68,7 +76,7 @@ export default class Store {
   async insertChat(chat: ChatModel) {
     await this.db.run(
       `
-        INSERT OR IGNORE INTO chats (id, name)
+        INSERT OR IGNORE INTO chats (id, name, source)
         VALUES (?, ?)
       `,
       [chat.id, chat.name]
@@ -78,11 +86,11 @@ export default class Store {
   async getChats(): Promise<ChatModel[]> {
     const chats = await this.db.all(
       `
-        SELECT id, name FROM chats
+        SELECT id, name, is_group, source FROM chats
       `
     );
     return chats.map((c) => {
-      return { id: c.id, name: c.name };
+      return { id: c.id, name: c.name, isGroup: c.is_group, source: c.source };
     });
   }
 }
