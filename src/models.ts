@@ -8,6 +8,7 @@ export interface MessageModel {
   timestamp: number;
   senderName: string;
   phoneNumber?: string;
+  isGroup: boolean;
   source: string;
 }
 
