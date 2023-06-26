@@ -40,7 +40,7 @@ export default class Server {
   }
 
   private async _sendMessage(msg: any) {
-    const resp = await this.messagingProvider.sendMessage(msg.id, msg.text);
+    const resp = await this.messagingProvider.sendMessage(msg.chatId, msg.text);
     return resp;
   }
 
