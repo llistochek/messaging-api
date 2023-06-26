@@ -15,5 +15,5 @@ export interface MessageModel {
 export interface ChatModel {
   id: string;
   name: string;
-  isGroup: string;
+  isGroup: boolean;
 }
