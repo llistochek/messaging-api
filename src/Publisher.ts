@@ -17,14 +17,14 @@ export default class Publisher {
   }
 
   attach(messageProvider: MessagingProvider) {
-    messageProvider.on('newMessages', (messages) => {
+    messageProvider.on('newMessages', async (messages) => {
       for (const message of messages) {
-        this.publishMessage(message).catch(console.error);
+        await this.publishMessage(message).catch(console.error);
       }
     });
-    messageProvider.on('newChats', (chats) => {
+    messageProvider.on('newChats', async (chats) => {
       for (const chat of chats) {
-        this.publishChat(chat).catch(console.error);
+        await this.publishChat(chat).catch(console.error);
       }
     });
   }
