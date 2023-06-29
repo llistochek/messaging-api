@@ -43,14 +43,18 @@ export default class SqliteStore implements Store {
 
   attach(messageProvider: MessagingProvider) {
     messageProvider.on('newMessages', (messages) => {
-      for (const message of messages) {
-        this.insertMessage(message).catch(console.error);
-      }
+      (async () => {
+        for (const message of messages) {
+          await this.insertMessage(message);
+        }
+      })().catch(console.error);
     });
     messageProvider.on('newChats', (chats) => {
-      for (const chat of chats) {
-        this.insertChat(chat).catch(console.error);
-      }
+      (async () => {
+        for (const chat of chats) {
+          await this.insertChat(chat);
+        }
+      })().catch(console.error);
     });
   }
 
