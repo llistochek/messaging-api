@@ -48,4 +48,8 @@ export default class Server {
     const resp = await this.store.getChats();
     return resp;
   }
+
+  close() {
+    this.socket.close();
+  }
 }

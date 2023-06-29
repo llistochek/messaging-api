@@ -1,4 +1,4 @@
-export interface MessageModel {
+export type MessageModel = {
   id: string;
   text: string;
   fromMe: boolean;
@@ -10,10 +10,10 @@ export interface MessageModel {
   phoneNumber?: string;
   isGroup: boolean;
   source: string;
-}
-
-export interface ChatModel {
+};
+export type ChatModel = {
   id: string;
   name: string;
   isGroup: boolean;
-}
+  source: string;
+};
