@@ -15,5 +15,7 @@ export type ChatModel = {
   id: string;
   name: string;
   isGroup: boolean;
+  description?: string;
+  participants?: string[];
   source: string;
 };

@@ -27,7 +27,8 @@ export default class Server {
   private readonly handlerTable: { [key: string]: (req: any) => Promise<any> } =
     {
       sendMessage: this._sendMessage,
-      getChats: this._getChats
+      getChats: this._getChats,
+      getChatInfo: this._getChatInfo
     };
 
   async listen() {
@@ -46,6 +47,11 @@ export default class Server {
 
   private async _getChats(req: any) {
     const resp = await this.store.getChats();
+    return resp;
+  }
+
+  private async _getChatInfo(req: any) {
+    const resp = await this.messagingProvider.getChatInfo(req.chatId);
     return resp;
   }
 

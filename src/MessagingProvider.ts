@@ -11,4 +11,6 @@ export default abstract class MessagingProvider extends (EventEmitter as new () 
     chatId: string,
     text: string
   ): Promise<MessageModel | null>;
+
+  abstract getChatInfo(chatId: string): Promise<ChatModel | null>;
 }
