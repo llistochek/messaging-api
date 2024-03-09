@@ -39,6 +39,7 @@ export default class Server {
       try {
         resp = await this.handlerTable[req.type].call(this, req.body);
       } catch (e: any) {
+        console.log('Error ocurred in handler');
         console.error(e);
         resp = { error: e.message };
       }
