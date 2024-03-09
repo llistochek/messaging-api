@@ -11,11 +11,16 @@ export type MessageModel = {
   isGroup: boolean;
   source: string;
 };
+export type ParticipantModel = {
+  id: string;
+  name?: string;
+  phoneNumber?: string;
+};
 export type ChatModel = {
   id: string;
   name: string;
   isGroup: boolean;
   description?: string;
-  participants?: string[];
+  participants?: ParticipantModel[];
   source: string;
 };
