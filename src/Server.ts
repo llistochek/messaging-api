@@ -35,7 +35,13 @@ export default class Server {
     while (true) {
       const rawReq = await this.socket.receive();
       const req: Request = JSON.parse(rawReq.toString());
-      const resp = await this.handlerTable[req.type].call(this, req.body);
+      let resp;
+      try {
+        resp = await this.handlerTable[req.type].call(this, req.body);
+      } catch (e: any) {
+        console.error(e);
+        resp = { error: e.message };
+      }
       await this.socket.send(JSON.stringify(resp));
     }
   }
