@@ -13,6 +13,7 @@ export type MessageModel = {
 };
 export type ParticipantModel = {
   id: string;
+  isAdmin: boolean;
   name?: string;
   phoneNumber?: string;
 };
