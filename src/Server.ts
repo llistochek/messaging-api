@@ -7,18 +7,16 @@ interface Request {
   body: any;
 }
 
-type ServerParameters = {
-  socket: zmq.Reply;
-  store: Store;
-  messagingProvider: MessagingProvider;
-};
-
 export default class Server {
   private socket: zmq.Reply;
   private store: Store;
   private messagingProvider: MessagingProvider;
 
-  constructor({ socket, store, messagingProvider }: ServerParameters) {
+  constructor(
+    socket: zmq.Reply,
+    store: Store,
+    messagingProvider: MessagingProvider
+  ) {
     this.socket = socket;
     this.store = store;
     this.messagingProvider = messagingProvider;
@@ -41,7 +39,7 @@ export default class Server {
       } catch (e: any) {
         console.log('Error ocurred in handler');
         console.error(e);
-        resp = { error: e.message };
+        resp = { error: e.message ?? 'Something went wrong' };
       }
       await this.socket.send(JSON.stringify(resp));
     }

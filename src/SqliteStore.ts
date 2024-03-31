@@ -1,12 +1,14 @@
-import { Database } from 'sqlite';
 import { MessageModel, ChatModel } from './models';
-import MessagingProvider from './MessagingProvider';
+import { Database, open } from 'sqlite';
+import sqlite3 from 'sqlite3';
 import Store from './Store';
 
 export default class SqliteStore implements Store {
+  private dbPath: string;
   private db: Database;
-  constructor(db: Database) {
-    this.db = db;
+
+  constructor(dbPath: string) {
+    this.dbPath = dbPath;
   }
 
   static TABLES = [
@@ -36,26 +38,13 @@ export default class SqliteStore implements Store {
   ];
 
   async init() {
+    this.db = await open({
+      filename: this.dbPath,
+      driver: sqlite3.Database
+    });
     for (const t of SqliteStore.TABLES) {
       await this.db.run(t);
     }
-  }
-
-  attach(messageProvider: MessagingProvider) {
-    messageProvider.on('newMessages', (messages) => {
-      (async () => {
-        for (const message of messages) {
-          await this.insertMessage(message);
-        }
-      })().catch(console.error);
-    });
-    messageProvider.on('newChats', (chats) => {
-      (async () => {
-        for (const chat of chats) {
-          await this.insertChat(chat);
-        }
-      })().catch(console.error);
-    });
   }
 
   async insertMessage(message: MessageModel) {

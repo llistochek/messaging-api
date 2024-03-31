@@ -6,3 +6,4 @@ import SqliteStore from './SqliteStore';
 
 export { MessageModel, ChatModel } from './models';
 export { MessagingProvider, Publisher, Server, Store, SqliteStore };
+export { runApplication } from './application';
