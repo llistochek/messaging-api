@@ -1,66 +1,54 @@
-import * as zmq from 'zeromq';
 import Store from './Store';
 import MessagingProvider from './MessagingProvider';
-
-interface Request {
-  type: string;
-  body: any;
-}
+import Fastify, { FastifyInstance } from 'fastify';
+import websocket from '@fastify/websocket';
 
 export default class Server {
-  private socket: zmq.Reply;
   private store: Store;
   private messagingProvider: MessagingProvider;
+  private app: FastifyInstance;
 
-  constructor(
-    socket: zmq.Reply,
-    store: Store,
-    messagingProvider: MessagingProvider
-  ) {
-    this.socket = socket;
+  constructor(store: Store, messagingProvider: MessagingProvider) {
     this.store = store;
     this.messagingProvider = messagingProvider;
   }
 
-  private readonly handlerTable: { [key: string]: (req: any) => Promise<any> } =
-    {
-      sendMessage: this._sendMessage,
-      getChats: this._getChats,
-      getChatInfo: this._getChatInfo
-    };
-
-  async listen() {
-    while (true) {
-      const rawReq = await this.socket.receive();
-      const req: Request = JSON.parse(rawReq.toString());
-      let resp;
-      try {
-        resp = await this.handlerTable[req.type].call(this, req.body);
-      } catch (e: any) {
-        console.log('Error ocurred in handler');
-        console.error(e);
-        resp = { error: e.message ?? 'Something went wrong' };
+  async listen(port: number) {
+    const app = Fastify({ logger: false });
+    await app.register(websocket);
+    app.get('/newMessages', { websocket: true }, (socket, req) => {
+      this.messagingProvider.on('newMessages', (messages) => {
+        for (const message of messages) {
+          socket.send(JSON.stringify(message));
+        }
+      });
+    });
+    app.get('/chats', async (req, res) => {
+      const resp = await this.store.getChats();
+      res.send(resp);
+    });
+    app.get<{ Params: { chatId: string } }>(
+      '/chats/:chatId',
+      async (req, res) => {
+        const resp = await this.messagingProvider.getChatInfo(
+          req.params.chatId
+        );
+        res.send(resp);
       }
-      await this.socket.send(JSON.stringify(resp));
-    }
+    );
+    app.post<{ Body: { chatId: string; text: string } }>(
+      '/messages',
+      async (req, res) => {
+        const { chatId, text } = req.body;
+        const resp = await this.messagingProvider.sendMessage(chatId, text);
+        res.send(resp);
+      }
+    );
+    app.listen({ port });
+    this.app = app;
   }
 
-  private async _sendMessage(msg: any) {
-    const resp = await this.messagingProvider.sendMessage(msg.chatId, msg.text);
-    return resp;
-  }
-
-  private async _getChats(req: any) {
-    const resp = await this.store.getChats();
-    return resp;
-  }
-
-  private async _getChatInfo(req: any) {
-    const resp = await this.messagingProvider.getChatInfo(req.chatId);
-    return resp;
-  }
-
-  close() {
-    this.socket.close();
+  async close() {
+    this.app.close();
   }
 }

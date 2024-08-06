@@ -7,6 +7,7 @@ export type MessageModel = {
   senderId: string;
   timestamp: number;
   senderName: string;
+  attachedMediaKeys?: string[];
   phoneNumber?: string;
   isGroup: boolean;
   source: string;

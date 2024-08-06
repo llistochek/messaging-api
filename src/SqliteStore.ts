@@ -11,40 +11,14 @@ export default class SqliteStore implements Store {
     this.dbPath = dbPath;
   }
 
-  static TABLES = [
-    `
-      CREATE TABLE IF NOT EXISTS chats (
-        id TEXT PRIMARY KEY,
-        name TEXT,
-        is_group BOOLEAN,
-        source TEXT
-      )
-    `,
-    `
-      CREATE TABLE IF NOT EXISTS messages (
-        id TEXT PRIMARY KEY,
-        text TEXT,
-        from_me BOOLEAN,
-        is_reply BOOLEAN,
-        chat_id TEXT,
-        sender TEXT,
-        timestamp INTEGER,
-        sender_name TEXT,
-        phone_number TEXT,
-        is_group BOOLEAN,
-        source TEXT
-      )
-    `
-  ];
+  static TABLES = [];
 
   async init() {
     this.db = await open({
       filename: this.dbPath,
       driver: sqlite3.Database
     });
-    for (const t of SqliteStore.TABLES) {
-      await this.db.run(t);
-    }
+    await this.db.exec(SQL_SCRIPT);
   }
 
   async insertMessage(message: MessageModel) {
@@ -67,6 +41,18 @@ export default class SqliteStore implements Store {
         message.source
       ]
     );
+    const mediaKeys = message.attachedMediaKeys;
+    if (mediaKeys != null) {
+      for (const key of mediaKeys) {
+        await this.db.run(
+          `
+          INSERT OR IGNORE INTO media(message_id, key_data)
+          VALUES(?, ?)
+        `,
+          [message.id, key]
+        );
+      }
+    }
   }
 
   async insertChat(chat: ChatModel) {
@@ -90,3 +76,31 @@ export default class SqliteStore implements Store {
     });
   }
 }
+
+const SQL_SCRIPT = `
+PRAGMA foreign_keys = ON;
+CREATE TABLE IF NOT EXISTS chats (
+    id TEXT PRIMARY KEY,
+    name TEXT,
+    is_group BOOLEAN,
+    source TEXT
+);
+CREATE TABLE IF NOT EXISTS messages (
+    id TEXT PRIMARY KEY,
+    text TEXT,
+    from_me BOOLEAN,
+    is_reply BOOLEAN,
+    chat_id TEXT,
+    sender TEXT,
+    timestamp INTEGER,
+    sender_name TEXT,
+    phone_number TEXT,
+    is_group BOOLEAN,
+    source TEXT
+);
+CREATE TABLE IF NOT EXISTS media (
+    id INTEGER PRIMARY KEY,
+    message_id INTEGER REFERENCES messages(id),
+    key_data TEXT
+);
+`;

@@ -4,7 +4,6 @@ import { describe, it, beforeEach, afterEach } from 'mocha';
 import { ChatModel, MessageModel } from '../src/models';
 import Store from '../src/Store';
 import MessagingProvider from '../src/MessagingProvider';
-import * as zmq from 'zeromq';
 
 class MockMessagingProvider extends MessagingProvider {
   message: MessageModel = {
@@ -51,7 +50,6 @@ class MockStore implements Store {
 }
 
 const SOCKET_ADDR = 'tcp://127.0.0.1:5829';
-// Write test for Server
 describe('Server', function () {
   let store: MockStore;
   let provider: MockMessagingProvider;
