@@ -41,15 +41,15 @@ export default class SqliteStore implements Store {
         message.source
       ]
     );
-    const mediaKeys = message.attachedMediaKeys;
-    if (mediaKeys != null) {
-      for (const key of mediaKeys) {
+    const mediaArr = message.attachedMedia;
+    if (mediaArr != null) {
+      for (const media of mediaArr) {
         await this.db.run(
           `
-          INSERT OR IGNORE INTO media(message_id, key_data)
-          VALUES(?, ?)
+          INSERT OR IGNORE INTO media(message_id, key_data, mime_type)
+          VALUES(?, ?, ?)
         `,
-          [message.id, key]
+          [message.id, media.key, media.mimeType]
         );
       }
     }
@@ -101,6 +101,7 @@ CREATE TABLE IF NOT EXISTS messages (
 CREATE TABLE IF NOT EXISTS media (
     id INTEGER PRIMARY KEY,
     message_id INTEGER REFERENCES messages(id),
+    mime_type TEXT,
     key_data TEXT
 );
 `;

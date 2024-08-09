@@ -1,7 +1,8 @@
 import Store from './Store';
-import MessagingProvider from './MessagingProvider';
+import MessagingProvider, { InMemoryMedia } from './MessagingProvider';
 import Fastify, { FastifyInstance } from 'fastify';
 import websocket from '@fastify/websocket';
+import multipart, { MultipartFile } from '@fastify/multipart';
 
 export default class Server {
   private store: Store;
@@ -14,8 +15,15 @@ export default class Server {
   }
 
   async listen(port: number) {
-    const app = Fastify({ logger: false });
+    const app = Fastify({ logger: { level: 'trace' }, maxParamLength: 8192 });
     await app.register(websocket);
+    await app.register(multipart, {
+      limits: {
+        fieldSize: 50 * 1024 * 1024,
+        fileSize: 50 * 1024 * 1024
+      }
+    });
+
     app.get('/newMessages', { websocket: true }, (socket, req) => {
       this.messagingProvider.on('newMessages', (messages) => {
         for (const message of messages) {
@@ -36,14 +44,43 @@ export default class Server {
         res.send(resp);
       }
     );
-    app.post<{ Body: { chatId: string; text: string } }>(
-      '/messages',
-      async (req, res) => {
-        const { chatId, text } = req.body;
-        const resp = await this.messagingProvider.sendMessage(chatId, text);
-        res.send(resp);
+    app.get<{ Params: { key: string } }>('/media/:key', async (req, res) => {
+      const media = await this.messagingProvider.getMedia(req.params.key);
+      if (media == null) {
+        res.status(404);
+        res.send();
+      } else {
+        res.header('Content-Type', media.mimeType);
+        res.send(media.data);
       }
-    );
+    });
+    app.post('/messages', async (req, res) => {
+      // console.log('YEP');
+      const media: InMemoryMedia[] = [];
+      let msg;
+      for await (const data of req.parts()) {
+        console.log(data);
+        if (data.type === 'file') {
+          media.push({
+            mimeType: msg.mimeType,
+            data: await (data as MultipartFile).toBuffer()
+          });
+        } else {
+          const value = data.value as any;
+          if (value == null) continue;
+          msg = value;
+        }
+      }
+      console.log(JSON.stringify(media, null, 2));
+      // @ts-ignore
+      console.log(req.fields);
+      const resp = await this.messagingProvider.sendMessage(
+        msg.chatId,
+        msg.text,
+        media
+      );
+      res.send(resp);
+    });
     app.listen({ port });
     this.app = app;
   }

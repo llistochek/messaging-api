@@ -1,3 +1,7 @@
+export type AttachedMedia = {
+  mimeType: string;
+  key: string;
+};
 export type MessageModel = {
   id: string;
   text: string;
@@ -7,7 +11,7 @@ export type MessageModel = {
   senderId: string;
   timestamp: number;
   senderName: string;
-  attachedMediaKeys?: string[];
+  attachedMedia: AttachedMedia[];
   phoneNumber?: string;
   isGroup: boolean;
   source: string;
