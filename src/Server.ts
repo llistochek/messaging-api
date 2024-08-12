@@ -55,11 +55,9 @@ export default class Server {
       }
     });
     app.post('/messages', async (req, res) => {
-      // console.log('YEP');
       const media: InMemoryMedia[] = [];
       let msg;
       for await (const data of req.parts()) {
-        console.log(data);
         if (data.type === 'file') {
           media.push({
             mimeType: msg.mimeType,
@@ -71,9 +69,6 @@ export default class Server {
           msg = value;
         }
       }
-      console.log(JSON.stringify(media, null, 2));
-      // @ts-ignore
-      console.log(req.fields);
       const resp = await this.messagingProvider.sendMessage(
         msg.chatId,
         msg.text,
