@@ -15,7 +15,7 @@ export default class Server {
   }
 
   async listen(port: number) {
-    const app = Fastify({ logger: { level: 'trace' }, maxParamLength: 8192 });
+    const app = Fastify({ logger: false, maxParamLength: 8192 });
     await app.register(websocket);
     await app.register(multipart, {
       limits: {
