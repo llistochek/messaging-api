@@ -8,7 +8,7 @@ export type MessageModel = {
   fromMe: boolean;
   isReply: boolean;
   chatId: string;
-  senderId: string;
+  senderId: string | null;
   timestamp: number;
   senderName: string;
   attachedMedia: AttachedMedia[];

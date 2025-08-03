@@ -14,7 +14,7 @@ export default class Server {
     this.messagingProvider = messagingProvider;
   }
 
-  async listen(port: number) {
+  async listen(port: number, host: string = 'localhost') {
     const app = Fastify({ logger: false, maxParamLength: 8192 });
     await app.register(websocket);
     await app.register(multipart, {
@@ -76,7 +76,7 @@ export default class Server {
       );
       res.send(resp);
     });
-    app.listen({ port });
+    app.listen({ port, host });
     this.app = app;
   }
 
