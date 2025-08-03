@@ -10,7 +10,7 @@ export type MessageModel = {
   chatId: string;
   senderId: string | null;
   timestamp: number;
-  senderName: string;
+  senderName: string | null;
   attachedMedia: AttachedMedia[];
   phoneNumber?: string;
   isGroup: boolean;
