@@ -1,11 +1,13 @@
 import Store from './Store';
+import { getEnvOrThrow, getEnvOrDefault } from './utils';
 import MessagingProvider from './MessagingProvider';
 import Server from './Server';
 
 export async function runApplication(
-  serverPort: number,
   store: Store,
-  messagingProvider: MessagingProvider
+  messagingProvider: MessagingProvider,
+  serverPort: number = parseInt(getEnvOrThrow('SERVER_PORT')),
+  serverHost: string = getEnvOrDefault('SERVER_HOST', 'localhost')
 ) {
   const server = new Server(store, messagingProvider);
   messagingProvider.on('newMessages', async (messages) => {
@@ -18,5 +20,5 @@ export async function runApplication(
       await store.insertChat(chat);
     }
   });
-  await server.listen(serverPort);
+  await server.listen(serverPort, serverHost);
 }
