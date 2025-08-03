@@ -12,7 +12,7 @@ export type MessageModel = {
   timestamp: number;
   senderName: string | null;
   attachedMedia: AttachedMedia[];
-  phoneNumber?: string;
+  phoneNumber: string | null;
   isGroup: boolean;
   source: string;
 };
