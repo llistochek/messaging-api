@@ -11,3 +11,4 @@ export {
 } from './models';
 export { MessagingProvider, Server, Store, SqliteStore, InMemoryMedia };
 export { runApplication } from './application';
+export { ConnectionState } from './MessagingProvider';

@@ -2,7 +2,13 @@ import { MessageModel, ChatModel } from './models';
 import TypedEmitter from 'typed-emitter';
 import EventEmitter from 'events';
 
+export enum ConnectionState {
+  OPEN,
+  OTHER
+}
+
 type MessagingEvents = {
+  newConnectionState: (state: ConnectionState) => void;
   newMessages: (messages: MessageModel[]) => void;
   newChats: (chats: ChatModel[]) => void;
 };
